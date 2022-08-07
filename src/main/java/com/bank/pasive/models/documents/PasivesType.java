@@ -1,5 +1,6 @@
 package com.bank.pasive.models.documents;
 
+import com.bank.pasive.models.enums.PasiveNameType;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import org.springframework.data.annotation.Id;
@@ -8,10 +9,9 @@ import org.springframework.data.annotation.Id;
 @NoArgsConstructor
 public class PasivesType {
 
-    @Id
-    private String id;
+    private PasiveNameType name;
 
-    private String name;
+    private String comission;
 
     private String transactionDay;
 
