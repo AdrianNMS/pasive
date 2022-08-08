@@ -21,6 +21,4 @@ public class Pasive extends Audit {
     private PasivesType pasivesType;
 
     private Double mont;
-
-    private List<Movement> movements;
 }
