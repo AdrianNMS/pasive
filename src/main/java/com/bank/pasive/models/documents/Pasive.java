@@ -1,5 +1,6 @@
 package com.bank.pasive.models.documents;
 
+import com.bank.pasive.models.enums.PasiveNameType;
 import com.bank.pasive.models.utils.Audit;
 import com.fasterxml.jackson.annotation.JsonFormat;
 import lombok.Data;
@@ -8,7 +9,6 @@ import org.springframework.data.annotation.Id;
 import org.springframework.data.mongodb.core.mapping.Document;
 
 import java.util.Date;
-import java.util.List;
 
 @Data
 @NoArgsConstructor
@@ -20,7 +20,7 @@ public class Pasive extends Audit {
 
     private String clientId;
 
-    private PasivesType pasivesType;
+    private PasiveNameType pasivesType;
 
     private Double mont;
 
