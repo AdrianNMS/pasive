@@ -21,7 +21,7 @@ public class ParameterImpl implements ParameterService {
     @Override
     public Mono<ResponseParameter> getAllUsers(){
         return webClient.get()
-                .uri("/api/parameter/1000")
+                .uri("/api/parameter/")
                 .retrieve()
                 .bodyToMono(ResponseParameter.class)
                 ;
