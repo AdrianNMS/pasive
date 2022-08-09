@@ -4,7 +4,6 @@ import com.bank.pasive.handler.ResponseHandler;
 import com.bank.pasive.models.dao.PasiveDao;
 import com.bank.pasive.models.documents.Parameter;
 import com.bank.pasive.models.documents.Pasive;
-import com.bank.pasive.models.utils.ResponseParameter;
 import com.bank.pasive.services.ParameterService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -12,11 +11,10 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
-import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Collectors;
 
 
 @RestController
@@ -27,7 +25,7 @@ public class PasiveControllers {
     private PasiveDao dao;
 
     @Autowired
-    private ParameterService parameterClientService;
+    private ParameterService parameterService;
 
     private static final Logger log = LoggerFactory.getLogger(PasiveControllers.class);
 
@@ -46,13 +44,11 @@ public class PasiveControllers {
     public Mono<ResponseEntity<Object>> FindAll() {
         log.info("[INI] FindAll Pasive");
 
-        Mono<ResponseEntity<Object>>  responseEntityMono= dao.findAll()
+        return dao.findAll()
                 .doOnNext(person -> log.info(person.toString()))
                 .collectList().map(pasives -> ResponseHandler.response("Done", HttpStatus.OK, pasives))
                 .onErrorResume(error -> Mono.just(ResponseHandler.response(error.getMessage(), HttpStatus.BAD_REQUEST, null)))
                 .doFinally(fin -> log.info("[END] FindAll Pasive"));
-
-        return responseEntityMono;
     }
 
     @GetMapping("/{id}")
@@ -95,17 +91,30 @@ public class PasiveControllers {
 
     @GetMapping("/test-parameter")
     public Mono<ResponseEntity<Object>> getParamter() {
-        log.info("[INI] Paramter Pasive");
+        log.info("[INI] Parameter Pasive");
 
-        Flux<List<Parameter>> parameterFlux = parameterClientService.getAllUsers()
-                .map(data -> data.getData()).flux();
+        return parameterService.getAllUsers()
+                .doOnNext(parameter -> log.info(parameter.toString()))
+                .flatMap(data -> {
+                        if(!data.getData().isEmpty()){
+                            List<Parameter> parameterTypePasive = parameterService.getParameter(data.getData(),
+                                    1002);
 
-        Mono<ResponseEntity<Object>>  responseEntityMono= dao.findAll()
-                .doOnNext(person -> log.info(person.toString()))
-                .collectList().map(pasives -> ResponseHandler.response("Done", HttpStatus.OK, pasives))
-                .onErrorResume(error -> Mono.just(ResponseHandler.response(error.getMessage(), HttpStatus.BAD_REQUEST, null)))
-                .doFinally(fin -> log.info("[END] Paramter Pasive"));
+                            if(parameterTypePasive.isEmpty()){
+                                return Mono.just( ResponseHandler.response("Error in Parameter 1002", HttpStatus.BAD_REQUEST, null));
+                            }
 
-        return responseEntityMono;
+                             return dao.findAll()
+                                    .doOnNext(person -> log.info(person.toString()))
+                                     .collectList().map(pasives -> ResponseHandler.response("Done", HttpStatus.OK, pasives))
+                                     .onErrorResume(error -> Mono.just(ResponseHandler.response(error.getMessage(), HttpStatus.BAD_REQUEST, null)));
+
+                        }else {
+                            return Mono.just( ResponseHandler.response("Error in Parameter", HttpStatus.BAD_REQUEST, null));
+                        }
+                    }
+
+                ).doFinally(fin -> log.info("[END] Parameter Pasive"));
     }
+
 }
