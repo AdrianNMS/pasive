@@ -26,5 +26,4 @@ public class Pasive extends Audit {
 
     @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "dd-MM-yyyy")
     private Date specificDay;
-
 }

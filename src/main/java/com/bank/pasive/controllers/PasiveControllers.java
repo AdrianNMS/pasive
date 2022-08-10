@@ -47,6 +47,7 @@ public class PasiveControllers {
                 .doOnNext(person -> log.info(person.toString()))
                 .collectList().map(pasives -> ResponseHandler.response("Done", HttpStatus.OK, pasives))
                 .onErrorResume(error -> Mono.just(ResponseHandler.response(error.getMessage(), HttpStatus.BAD_REQUEST, null)))
+                .switchIfEmpty(Mono.just(ResponseHandler.response("Empty", HttpStatus.NO_CONTENT, null)))
                 .doFinally(fin -> log.info("[END] FindAll Pasive"));
     }
 
@@ -57,6 +58,7 @@ public class PasiveControllers {
                 .doOnNext(pasive -> log.info(pasive.toString()))
                 .map(pasive -> ResponseHandler.response("Done", HttpStatus.OK, pasive))
                 .onErrorResume(error -> Mono.just(ResponseHandler.response(error.getMessage(), HttpStatus.BAD_REQUEST, null)))
+                .switchIfEmpty(Mono.just(ResponseHandler.response("Empty", HttpStatus.NO_CONTENT, null)))
                 .doFinally(fin -> log.info("[END] Find Pasive"));
     }
 
@@ -88,32 +90,33 @@ public class PasiveControllers {
         .doFinally(fin -> log.info("[END] Delete Pasive"));
     }
 
-    @GetMapping("/test-parameter")
-    public Mono<ResponseEntity<Object>> getParamter() {
-        log.info("[INI] Parameter Pasive");
-
-        return parameterService.getAllUsers()
-                .doOnNext(parameter -> log.info(parameter.toString()))
-                .flatMap(data -> {
-                        if(!data.getData().isEmpty()){
-                            List<Parameter> parameterTypePasive = parameterService.getParameter(data.getData(),
-                                    1002);
-
-                            if(parameterTypePasive.isEmpty()){
-                                return Mono.just( ResponseHandler.response("Error in Parameter 1002", HttpStatus.BAD_REQUEST, null));
-                            }
-
-                             return dao.findAll()
-                                    .doOnNext(person -> log.info(person.toString()))
-                                     .collectList().map(pasives -> ResponseHandler.response("Done", HttpStatus.OK, pasives))
-                                     .onErrorResume(error -> Mono.just(ResponseHandler.response(error.getMessage(), HttpStatus.BAD_REQUEST, null)));
-
-                        }else {
-                            return Mono.just( ResponseHandler.response("Error in Parameter", HttpStatus.BAD_REQUEST, null));
-                        }
+    @GetMapping("/type/{id}")
+    public Mono<ResponseEntity<Object>> FindType(@PathVariable String id) {
+        log.info("[INI] Find Type Pasive");
+        return dao.findById(id)
+                .doOnNext(pasive -> log.info(pasive.toString()))
+                .flatMap(pasive ->
+                    {
+                        return parameterService.findByCode(pasive.getPasivesType().getValue())
+                                .doOnNext(responseParameter -> log.info(responseParameter.toString()))
+                                .flatMap(responseParameter ->
+                                {
+                                    if(!responseParameter.getData().isEmpty())
+                                    {
+                                        return Mono.just(ResponseHandler.response("Done", HttpStatus.OK, responseParameter.getData()));
+                                    }
+                                    else
+                                    {
+                                        return Mono.just(ResponseHandler.response("Empty", HttpStatus.NO_CONTENT, null));
+                                    }
+                                });
                     }
+                )
+                .onErrorResume(error -> Mono.just(ResponseHandler.response(error.getMessage(), HttpStatus.BAD_REQUEST, null)))
+                .switchIfEmpty(Mono.just(ResponseHandler.response("Empty", HttpStatus.NO_CONTENT, null)))
+                .doFinally(fin -> log.info("[END] Find Type Pasive"));
 
-                ).doFinally(fin -> log.info("[END] Parameter Pasive"));
     }
+
 
 }

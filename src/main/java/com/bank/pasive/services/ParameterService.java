@@ -8,7 +8,7 @@ import java.util.List;
 
 public interface ParameterService {
 
-    Mono<ResponseParameter> getAllUsers();
+    Mono<ResponseParameter> findByCode(Integer code);
 
     List<Parameter> getParameter(List<Parameter> listParameter, Integer code);
 }

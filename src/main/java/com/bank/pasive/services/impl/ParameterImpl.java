@@ -19,13 +19,12 @@ public class ParameterImpl implements ParameterService {
     WebClient webClient;
 
     @Override
-    public Mono<ResponseParameter> getAllUsers(){
+    public Mono<ResponseParameter> findByCode(Integer code)
+    {
         return webClient.get()
-                .uri("/api/parameter/")
+                .uri("/api/parameter/catalogue/"+ code)
                 .retrieve()
-                .bodyToMono(ResponseParameter.class)
-                ;
-
+                .bodyToMono(ResponseParameter.class);
     }
 
     public List<Parameter> getParameter(List<Parameter> listParameter, Integer code) {
