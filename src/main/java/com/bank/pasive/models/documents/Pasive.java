@@ -23,7 +23,7 @@ public class Pasive extends Audit {
 
     private PasiveNameType pasivesType;
 
-    private Double mont;
+    private Float mont;
 
     @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "dd-MM-yyyy",timezone = "GMT-05:00")
     private Date specificDay;

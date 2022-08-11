@@ -6,6 +6,6 @@ import lombok.Data;
 public class Mont
 {
     private String idPasive;
-    private float mont;
+    private Float mont;
 
 }
