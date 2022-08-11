@@ -8,6 +8,7 @@ import lombok.NoArgsConstructor;
 import org.springframework.data.annotation.Id;
 import org.springframework.data.mongodb.core.mapping.Document;
 
+import javax.validation.constraints.NotNull;
 import java.time.LocalDateTime;
 import java.util.Date;
 
@@ -18,9 +19,9 @@ public class Pasive extends Audit {
 
     @Id
     private String id;
-
+    @NotNull(message = "clientId must not be null")
     private String clientId;
-
+    @NotNull(message = "pasivesType must not be null")
     private PasiveNameType pasivesType;
 
     private Double mont;
