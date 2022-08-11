@@ -4,6 +4,7 @@ import com.bank.pasive.handler.ResponseHandler;
 import com.bank.pasive.models.dao.PasiveDao;
 import com.bank.pasive.models.documents.Parameter;
 import com.bank.pasive.models.documents.Pasive;
+import com.bank.pasive.models.utils.Mont;
 import com.bank.pasive.services.ParameterService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -45,6 +46,21 @@ public class PasiveControllers {
                 .doFinally(fin -> log.info("[END] Create Pasive"));
     }
 
+    @GetMapping("/mont/{id}")
+    public Mono<ResponseEntity<Object>> setMont(@PathVariable String id, @RequestBody Mont m) {
+        log.info("[INI] setMont Pasive");
+        return dao.findById(id)
+                .doOnNext(pasive -> log.info(pasive.toString()))
+                .flatMap(p -> {
+                            p.setMont(p.getMont()-m.getMont());
+                            return dao.save(p)
+                                    .map(pasive -> ResponseHandler.response("Done", HttpStatus.OK, null));
+                        })
+                .onErrorResume(error -> Mono.just(ResponseHandler.response(error.getMessage(), HttpStatus.BAD_REQUEST, null)))
+                .switchIfEmpty(Mono.just(ResponseHandler.response("Empty", HttpStatus.NO_CONTENT, null)))
+                .doFinally(fin -> log.info("[END] setMont Pasive"));
+    }
+
     @GetMapping
     public Mono<ResponseEntity<Object>> FindAll() {
         log.info("[INI] FindAll Pasive");
@@ -63,6 +79,17 @@ public class PasiveControllers {
         return dao.findById(id)
                 .doOnNext(pasive -> log.info(pasive.toString()))
                 .map(pasive -> ResponseHandler.response("Done", HttpStatus.OK, pasive))
+                .onErrorResume(error -> Mono.just(ResponseHandler.response(error.getMessage(), HttpStatus.BAD_REQUEST, null)))
+                .switchIfEmpty(Mono.just(ResponseHandler.response("Empty", HttpStatus.NO_CONTENT, null)))
+                .doFinally(fin -> log.info("[END] Find Pasive"));
+    }
+
+    @GetMapping("/mont/{id}")
+    public Mono<ResponseEntity<Object>> getMont(@PathVariable String id) {
+        log.info("[INI] Find Pasive");
+        return dao.findById(id)
+                .doOnNext(pasive -> log.info(pasive.toString()))
+                .map(pasive -> ResponseHandler.response("Done", HttpStatus.OK, pasive.getMont()))
                 .onErrorResume(error -> Mono.just(ResponseHandler.response(error.getMessage(), HttpStatus.BAD_REQUEST, null)))
                 .switchIfEmpty(Mono.just(ResponseHandler.response("Empty", HttpStatus.NO_CONTENT, null)))
                 .doFinally(fin -> log.info("[END] Find Pasive"));
