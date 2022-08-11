@@ -15,6 +15,7 @@ import org.springframework.web.bind.annotation.*;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
+import javax.validation.Valid;
 import java.text.SimpleDateFormat;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
@@ -37,8 +38,9 @@ public class PasiveControllers {
 
 
     @PostMapping
-    public Mono<ResponseEntity<Object>> Create(@RequestBody Pasive p) {
+    public Mono<ResponseEntity<Object>> Create(@Valid @RequestBody Pasive p) {
         log.info("[INI] Create Pasive");
+        p.setCreatedDate(LocalDateTime.now());
         return dao.save(p)
                 .doOnNext(pasive -> log.info(pasive.toString()))
                         .map(pasive -> ResponseHandler.response("Done", HttpStatus.OK, pasive))
@@ -102,14 +104,16 @@ public class PasiveControllers {
     }
 
     @PutMapping("/{id}")
-    public Mono<ResponseEntity<Object>> Update(@PathVariable("id") String id, @RequestBody Pasive p) {
+    public Mono<ResponseEntity<Object>> Update(@PathVariable("id") String id,@Valid @RequestBody Pasive p) {
         log.info("[INI] Update Pasive");
         return dao.existsById(id).flatMap(check -> {
-            if (check)
+            if (check){
+                p.setUpdateDate(LocalDateTime.now());
                 return dao.save(p)
                         .doOnNext(pasive -> log.info(pasive.toString()))
                         .map(pasive -> ResponseHandler.response("Done", HttpStatus.OK, pasive))
                         .onErrorResume(error -> Mono.just(ResponseHandler.response(error.getMessage(), HttpStatus.BAD_REQUEST, null)));
+            }
             else
                 return Mono.just(ResponseHandler.response("Not found", HttpStatus.NOT_FOUND, null));
 
