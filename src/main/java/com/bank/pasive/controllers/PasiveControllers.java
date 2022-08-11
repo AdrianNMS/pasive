@@ -11,9 +11,15 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
+import java.text.SimpleDateFormat;
+import java.time.LocalDateTime;
+import java.time.ZoneId;
+import java.util.Calendar;
 import java.util.List;
+import java.util.stream.Collectors;
 
 
 @RestController
@@ -101,9 +107,23 @@ public class PasiveControllers {
                                 .doOnNext(responseParameter -> log.info(responseParameter.toString()))
                                 .flatMap(responseParameter ->
                                 {
-                                    if(!responseParameter.getData().isEmpty())
+                                    List<Parameter> listParameter = responseParameter.getData();
+
+                                    if(!listParameter.isEmpty())
                                     {
-                                        return Mono.just(ResponseHandler.response("Done", HttpStatus.OK, responseParameter.getData()));
+
+                                        listParameter.forEach(parameter -> {
+                                            if(parameter.getValue().equals("2") && parameter.getArgument().equals("true"))
+                                            {
+                                                LocalDateTime localDateTime = pasive.getSpecificDay().toInstant()
+                                                        .atZone(ZoneId.systemDefault())
+                                                        .toLocalDate().atStartOfDay();
+                                                parameter.setArgument(localDateTime.getDayOfMonth()+"");
+                                            }
+                                        });
+
+
+                                        return Mono.just(ResponseHandler.response("Done", HttpStatus.OK, listParameter));
                                     }
                                     else
                                     {

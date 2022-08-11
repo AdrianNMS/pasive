@@ -7,9 +7,9 @@ import lombok.Getter;
 @Getter
 public enum PasiveNameType {
 
-    FIXEDTERM(1001),
-    SAVING(1002),
-    ACCOUNT(1003);
+    SAVING(1000),
+    ACCOUNT(1001),
+    FIXEDTERM(1002);
 
     private final int value;
 }
