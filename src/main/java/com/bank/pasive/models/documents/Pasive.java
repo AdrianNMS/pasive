@@ -8,6 +8,7 @@ import lombok.NoArgsConstructor;
 import org.springframework.data.annotation.Id;
 import org.springframework.data.mongodb.core.mapping.Document;
 
+import javax.validation.constraints.Min;
 import javax.validation.constraints.NotNull;
 import java.time.LocalDateTime;
 import java.util.Date;
@@ -24,6 +25,8 @@ public class Pasive extends Audit {
     @NotNull(message = "pasivesType must not be null")
     private PasiveNameType pasivesType;
 
+    @NotNull(message = "mont must not be null")
+    @Min(0)
     private Float mont;
 
     @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "dd-MM-yyyy",timezone = "GMT-05:00")

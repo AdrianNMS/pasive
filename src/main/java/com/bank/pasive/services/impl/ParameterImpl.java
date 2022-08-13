@@ -2,7 +2,7 @@ package com.bank.pasive.services.impl;
 
 import com.bank.pasive.models.documents.Parameter;
 import com.bank.pasive.models.utils.ResponseParameter;
-import com.bank.pasive.services.ParameterService;
+import com.bank.pasive.services.IParameterService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.web.reactive.function.client.WebClient;
@@ -13,7 +13,7 @@ import java.util.stream.Collectors;
 
 
 @Service
-public class ParameterImpl implements ParameterService {
+public class ParameterImpl implements IParameterService {
 
     @Autowired
     WebClient webClient;

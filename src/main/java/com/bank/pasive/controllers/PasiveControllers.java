@@ -1,27 +1,23 @@
 package com.bank.pasive.controllers;
 
 import com.bank.pasive.handler.ResponseHandler;
-import com.bank.pasive.models.dao.PasiveDao;
+import com.bank.pasive.models.dao.IPasiveDao;
 import com.bank.pasive.models.documents.Parameter;
 import com.bank.pasive.models.documents.Pasive;
 import com.bank.pasive.models.utils.Mont;
-import com.bank.pasive.services.ParameterService;
+import com.bank.pasive.services.IParameterService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
 import javax.validation.Valid;
-import java.text.SimpleDateFormat;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
-import java.util.Calendar;
 import java.util.List;
-import java.util.stream.Collectors;
 
 
 @RestController
@@ -29,10 +25,10 @@ import java.util.stream.Collectors;
 public class PasiveControllers {
 
     @Autowired
-    private PasiveDao dao;
+    private IPasiveDao dao;
 
     @Autowired
-    private ParameterService parameterService;
+    private IParameterService parameterService;
 
     private static final Logger log = LoggerFactory.getLogger(PasiveControllers.class);
 
@@ -94,7 +90,6 @@ public class PasiveControllers {
                 .map(pasive -> {
                     Mont mont = new Mont();
                     mont.setMont(pasive.getMont());
-                    mont.setIdPasive(id);
 
                     return ResponseHandler.response("Done", HttpStatus.OK, mont);
                 })
