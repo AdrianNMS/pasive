@@ -33,7 +33,9 @@ public class UpgradeVIPHelper
                 return UpdatePasive(log,pasiveService,p);
             else
                 return Mono.just(ResponseHandler.response("You don't have enough balance in your credit card", HttpStatus.OK, null));
-        });
+        })
+        .onErrorResume(error -> Mono.just(ResponseHandler.response(error.getMessage(), HttpStatus.BAD_REQUEST, null)))
+        .switchIfEmpty(Mono.just(ResponseHandler.response("Empty", HttpStatus.NO_CONTENT, null)));
     }
 
     public static Mono<ResponseEntity<Object>> CheckCreditCard(Logger log, IPasiveService pasiveService, IMovementService movementService, IActiveService activeService, Pasive p)
@@ -48,7 +50,9 @@ public class UpgradeVIPHelper
                         return Mono.just(ResponseHandler.response("Not Found", HttpStatus.NO_CONTENT, null));
                 }
 
-        );
+        )
+        .onErrorResume(error -> Mono.just(ResponseHandler.response(error.getMessage(), HttpStatus.BAD_REQUEST, null)))
+        .switchIfEmpty(Mono.just(ResponseHandler.response("Empty", HttpStatus.NO_CONTENT, null)));
     }
 
     public static Mono<ResponseEntity<Object>> FindActive(Logger log, IPasiveService pasiveService, IMovementService movementService, IActiveService activeService, String id)
@@ -61,7 +65,9 @@ public class UpgradeVIPHelper
                     }
                     else
                         return Mono.just(ResponseHandler.response("Not Found", HttpStatus.NO_CONTENT, null));
-                }).switchIfEmpty(Mono.just(ResponseHandler.response("Empty", HttpStatus.NO_CONTENT, null)));
+                })
+                .onErrorResume(error -> Mono.just(ResponseHandler.response(error.getMessage(), HttpStatus.BAD_REQUEST, null)))
+                .switchIfEmpty(Mono.just(ResponseHandler.response("Empty", HttpStatus.NO_CONTENT, null)));
     }
 
     public static Mono<ResponseEntity<Object>> UpdateVIPSequence(Logger log, IPasiveService pasiveService, IMovementService movementService, IActiveService activeService, String id)

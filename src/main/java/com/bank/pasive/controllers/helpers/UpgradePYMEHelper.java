@@ -35,7 +35,9 @@ public class UpgradePYMEHelper
                         return Mono.just(ResponseHandler.response("Not Found", HttpStatus.NO_CONTENT, null));
                 }
 
-        );
+        )
+        .onErrorResume(error -> Mono.just(ResponseHandler.response(error.getMessage(), HttpStatus.BAD_REQUEST, null)))
+        .switchIfEmpty(Mono.just(ResponseHandler.response("Empty", HttpStatus.NO_CONTENT, null)));
     }
 
     public static Mono<ResponseEntity<Object>> FindActive(Logger log, IPasiveService pasiveService, IActiveService activeService, String id)
@@ -48,9 +50,9 @@ public class UpgradePYMEHelper
                     }
                     else
                         return Mono.just(ResponseHandler.response("Not Found", HttpStatus.NO_CONTENT, null));
-                }).onErrorResume(error -> Mono.just(ResponseHandler.response(error.getMessage(), HttpStatus.BAD_REQUEST, null)))
-                .switchIfEmpty(Mono.just(ResponseHandler.response("Empty", HttpStatus.NO_CONTENT, null)))
-                .doFinally(fin -> log.info("[END] Upgrade PYME"));
+                })
+                .onErrorResume(error -> Mono.just(ResponseHandler.response(error.getMessage(), HttpStatus.BAD_REQUEST, null)))
+                .switchIfEmpty(Mono.just(ResponseHandler.response("Empty", HttpStatus.NO_CONTENT, null)));
     }
 
     public static Mono<ResponseEntity<Object>> UpdatePYMESequence(Logger log, IPasiveService pasiveService, IActiveService activeService, String id)
