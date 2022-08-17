@@ -11,6 +11,7 @@ import com.bank.pasive.services.IMovementService;
 import com.bank.pasive.services.IParameterService;
 import com.bank.pasive.services.IPasiveService;
 import io.github.resilience4j.circuitbreaker.annotation.CircuitBreaker;
+import io.github.resilience4j.timelimiter.annotation.TimeLimiter;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -120,6 +121,7 @@ public class PasiveControllers {
 
 
     @GetMapping("/type/{id}")
+    @TimeLimiter(name = RESILENCE_SERVICE)
     @CircuitBreaker(name = RESILENCE_SERVICE,fallbackMethod ="failedFindType")
     public Mono<ResponseEntity<Object>> FindType(@PathVariable String id) {
         log.info("[INI] Find Type Pasive");
@@ -144,12 +146,12 @@ public class PasiveControllers {
         return UpgradePYMEHelper.UpdatePYMESequence(log,pasiveService,activeService,id);
     }
 
-    public ResponseEntity<Object> failedFindType(String id, Exception e)
+    public Mono<ResponseEntity<Object>> failedFindType(String id, RuntimeException e)
     {
         log.error("[INIT] Failed FindType");
         log.error(e.getMessage());
         log.error(id);
         log.error("[END] Failed FindType");
-        return ResponseHandler.response("Overcharged method", HttpStatus.OK, null);
+        return Mono.just(ResponseHandler.response("Overcharged method", HttpStatus.PAYLOAD_TOO_LARGE, null));
     }
 }

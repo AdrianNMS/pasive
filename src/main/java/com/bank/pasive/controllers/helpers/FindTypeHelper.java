@@ -50,8 +50,6 @@ public class FindTypeHelper
             .flatMap(pasive ->
                     getParameterService(log,parameterService,pasive)
             )
-            .onErrorResume(error -> Mono.just(ResponseHandler.response(error.getMessage(), HttpStatus.BAD_REQUEST, null)))
-            .switchIfEmpty(Mono.just(ResponseHandler.response("Empty", HttpStatus.NO_CONTENT, null)))
             .doFinally(fin -> log.info("[END] Find Type Pasive"));
     }
 
