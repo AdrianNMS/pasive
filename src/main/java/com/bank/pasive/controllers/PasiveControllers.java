@@ -10,6 +10,7 @@ import com.bank.pasive.services.IActiveService;
 import com.bank.pasive.services.IMovementService;
 import com.bank.pasive.services.IParameterService;
 import com.bank.pasive.services.IPasiveService;
+import io.github.resilience4j.circuitbreaker.annotation.CircuitBreaker;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -39,8 +40,9 @@ public class PasiveControllers {
     @Autowired
     private IActiveService activeService;
 
-    private static final Logger log = LoggerFactory.getLogger(PasiveControllers.class);
 
+    private static final Logger log = LoggerFactory.getLogger(PasiveControllers.class);
+    private static final String RESILENCE_SERVICE = "defaultConfig";
 
     @PostMapping
     public Mono<ResponseEntity<Object>> Create(@Valid @RequestBody Pasive p) {
@@ -116,7 +118,9 @@ public class PasiveControllers {
                 .doFinally(fin -> log.info("[END] Delete Pasive"));
     }
 
+
     @GetMapping("/type/{id}")
+    @CircuitBreaker(name = RESILENCE_SERVICE,fallbackMethod ="failedFindType")
     public Mono<ResponseEntity<Object>> FindType(@PathVariable String id) {
         log.info("[INI] Find Type Pasive");
         return FindTypeHelper.FindTypeSequence(log,parameterService,pasiveService,id);
@@ -138,5 +142,14 @@ public class PasiveControllers {
         log.info("[INI] Upgrade PYME");
 
         return UpgradePYMEHelper.UpdatePYMESequence(log,pasiveService,activeService,id);
+    }
+
+    public ResponseEntity<Object> failedFindType(String id, Exception e)
+    {
+        log.error("[INIT] Failed FindType");
+        log.error(e.getMessage());
+        log.error(id);
+        log.error("[END] Failed FindType");
+        return ResponseHandler.response("Overcharged method", HttpStatus.OK, null);
     }
 }
