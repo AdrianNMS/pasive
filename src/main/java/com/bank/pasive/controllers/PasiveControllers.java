@@ -8,7 +8,7 @@ import com.bank.pasive.models.documents.Pasive;
 import com.bank.pasive.models.utils.Mont;
 import com.bank.pasive.services.IActiveService;
 import com.bank.pasive.services.IMovementService;
-import com.bank.pasive.services.IParameterService;
+import com.bank.pasive.services.IClientService;
 import com.bank.pasive.services.IPasiveService;
 import io.github.resilience4j.circuitbreaker.annotation.CircuitBreaker;
 import io.github.resilience4j.timelimiter.annotation.TimeLimiter;
@@ -33,7 +33,7 @@ public class PasiveControllers {
     private IPasiveService pasiveService;
 
     @Autowired
-    private IParameterService parameterService;
+    private IClientService parameterService;
 
     @Autowired
     private IMovementService movementService;

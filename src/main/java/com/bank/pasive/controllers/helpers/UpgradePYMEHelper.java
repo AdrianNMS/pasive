@@ -10,7 +10,6 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import reactor.core.publisher.Mono;
 
-import static com.bank.pasive.models.enums.PasiveNameType.SAVINGVIP;
 
 public class UpgradePYMEHelper
 {

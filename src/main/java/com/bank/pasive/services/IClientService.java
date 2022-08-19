@@ -3,7 +3,7 @@ package com.bank.pasive.services;
 import com.bank.pasive.models.utils.ResponseParameter;
 import reactor.core.publisher.Mono;
 
-public interface IParameterService {
+public interface IClientService {
 
-    Mono<ResponseParameter> findByCode(Integer code);
+    Mono<ResponseParameter> getParam(String clientId, Integer code);
 }

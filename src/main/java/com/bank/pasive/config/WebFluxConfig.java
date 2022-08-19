@@ -19,8 +19,8 @@ import reactor.netty.http.client.HttpClient;
 @EnableWebFlux
 public class WebFluxConfig implements WebFluxConfigurer
 {
-	@Value("${app.module.parameter.service.url}")
-	private String urlParameter;
+	@Value("${app.module.client.service.url}")
+	private String urlClient;
 
 	@Value("${app.module.movement.service.url}")
 	private String urlMovement;
@@ -29,7 +29,7 @@ public class WebFluxConfig implements WebFluxConfigurer
 	private String urlActive;
 
 	@Bean
-	public WebClient getWebClientParameter()
+	public WebClient getWebClientClient()
 	{
 		HttpClient httpClient = HttpClient.create()
 		        .tcpConfiguration(client ->
@@ -41,7 +41,7 @@ public class WebFluxConfig implements WebFluxConfigurer
 		ClientHttpConnector connector = new ReactorClientHttpConnector(httpClient.wiretap(true));	    
 
 		return WebClient.builder()
-		        .baseUrl(urlParameter)
+		        .baseUrl(urlClient)
 		        .clientConnector(connector)
 		        .defaultHeader(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE)
 		        .build();

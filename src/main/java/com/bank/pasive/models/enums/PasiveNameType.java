@@ -9,9 +9,7 @@ public enum PasiveNameType {
 
     SAVING(1000),
     ACCOUNT(1001),
-    FIXEDTERM(1002),
-    SAVINGVIP(1003),
-    ACCOUNTPYME(1004);
+    FIXEDTERM(1002);
 
     private final int value;
 }
