@@ -9,6 +9,8 @@ import org.springframework.stereotype.Service;
 import reactor.core.publisher.Mono;
 
 import java.util.List;
+import java.util.Objects;
+import java.util.stream.Collectors;
 
 @Service
 public class PasiveImpl implements IPasiveService
@@ -74,6 +76,19 @@ public class PasiveImpl implements IPasiveService
                     return Mono.just(mont);
                 });
     }
+
+    @Override
+    public Mono<Pasive> ExistByClientIdType(Integer type, String id) {
+
+        return FindAll().flatMap(pas->
+           Mono.just(Objects.requireNonNull(pas.stream()
+                   .filter(pasive -> pasive.getClientId().equals(id) && pasive.getPasivesType().getValue() == type)
+                   .findFirst().orElse(null))
+           )
+        );
+    }
+
+
 
 
 }

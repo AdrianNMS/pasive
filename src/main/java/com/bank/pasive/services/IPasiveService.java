@@ -14,6 +14,6 @@ public interface IPasiveService
     Mono<Pasive> Update(String id, Pasive pasive);
     Mono<Object> Delete(String id);
     Mono<Pasive> SetMont(String id, Mont mont);
-
     Mono<Mont> GetMont(String id);
+    Mono<Pasive> ExistByClientIdType(Integer type, String id);
 }

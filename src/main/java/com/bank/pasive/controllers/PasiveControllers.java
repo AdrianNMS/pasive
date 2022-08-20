@@ -1,13 +1,9 @@
 package com.bank.pasive.controllers;
 
 import com.bank.pasive.controllers.helpers.FindTypeHelper;
-import com.bank.pasive.controllers.helpers.UpgradePYMEHelper;
-import com.bank.pasive.controllers.helpers.UpgradeVIPHelper;
 import com.bank.pasive.handler.ResponseHandler;
 import com.bank.pasive.models.documents.Pasive;
 import com.bank.pasive.models.utils.Mont;
-import com.bank.pasive.services.IActiveService;
-import com.bank.pasive.services.IMovementService;
 import com.bank.pasive.services.IClientService;
 import com.bank.pasive.services.IPasiveService;
 import io.github.resilience4j.circuitbreaker.annotation.CircuitBreaker;
@@ -28,18 +24,11 @@ import java.time.LocalDateTime;
 @RequestMapping("/api/pasive")
 public class PasiveControllers {
 
-
     @Autowired
     private IPasiveService pasiveService;
 
     @Autowired
     private IClientService parameterService;
-
-    @Autowired
-    private IMovementService movementService;
-
-    @Autowired
-    private IActiveService activeService;
 
 
     private static final Logger log = LoggerFactory.getLogger(PasiveControllers.class);
@@ -113,12 +102,23 @@ public class PasiveControllers {
         log.info(id);
 
         return pasiveService.Delete(id)
-                .flatMap(o -> Mono.just(ResponseHandler.response("Done", HttpStatus.NO_CONTENT, null)))
+                .flatMap(o -> Mono.just(ResponseHandler.response("Done", HttpStatus.OK, null)))
                 .onErrorResume(error -> Mono.just(ResponseHandler.response(error.getMessage(), HttpStatus.BAD_REQUEST, null)))
                 .switchIfEmpty(Mono.just(ResponseHandler.response("Error", HttpStatus.NO_CONTENT, null)))
                 .doFinally(fin -> log.info("[END] Delete Pasive"));
     }
 
+
+    @GetMapping("/client/{type}/{idClient}")
+    public Mono<ResponseEntity<Object>> ExistByClientIdType(@PathVariable Integer type, @PathVariable String idClient)
+    {
+        log.info("[INI] ExistByClientIdType");
+        return pasiveService.ExistByClientIdType(type,idClient)
+                .flatMap(pasive -> Mono.just(ResponseHandler.response("Done", HttpStatus.OK, pasive.getId())))
+                .onErrorResume(error -> Mono.just(ResponseHandler.response(error.getMessage(), HttpStatus.BAD_REQUEST, null)))
+                .switchIfEmpty(Mono.just(ResponseHandler.response("Error", HttpStatus.NO_CONTENT, null)))
+                .doFinally(fin -> log.info("[END] ExistByClientIdType"));
+    }
 
     @GetMapping("/type/{id}")
     @TimeLimiter(name = RESILENCE_SERVICE)
@@ -127,23 +127,6 @@ public class PasiveControllers {
         log.info("[INI] Find Type Pasive");
         return FindTypeHelper.FindTypeSequence(log,parameterService,pasiveService,id);
 
-    }
-
-    @GetMapping("/upgrade/vip/{id}")
-    public Mono<ResponseEntity<Object>> UpgradeVIP(@PathVariable("id") String id)
-    {
-        log.info("[INI] Upgrade VIP");
-
-        return UpgradeVIPHelper.UpdateVIPSequence(log,pasiveService,movementService,activeService,id);
-
-    }
-
-    @GetMapping("/upgrade/pyme/{id}")
-    public Mono<ResponseEntity<Object>> UpgradePYME(@PathVariable("id") String id)
-    {
-        log.info("[INI] Upgrade PYME");
-
-        return UpgradePYMEHelper.UpdatePYMESequence(log,pasiveService,activeService,id);
     }
 
     public Mono<ResponseEntity<Object>> failedFindType(String id, RuntimeException e)
