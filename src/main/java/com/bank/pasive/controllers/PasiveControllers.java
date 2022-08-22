@@ -4,6 +4,7 @@ import com.bank.pasive.controllers.helpers.FindTypeHelper;
 import com.bank.pasive.handler.ResponseHandler;
 import com.bank.pasive.models.documents.Pasive;
 import com.bank.pasive.models.utils.Mont;
+import com.bank.pasive.services.IActiveService;
 import com.bank.pasive.services.IClientService;
 import com.bank.pasive.services.IPasiveService;
 import io.github.resilience4j.circuitbreaker.annotation.CircuitBreaker;
@@ -30,7 +31,8 @@ public class PasiveControllers {
     @Autowired
     private IClientService parameterService;
 
-
+    @Autowired
+    private IActiveService activeService;
     private static final Logger log = LoggerFactory.getLogger(PasiveControllers.class);
     private static final String RESILENCE_SERVICE = "defaultConfig";
 
@@ -38,11 +40,25 @@ public class PasiveControllers {
     public Mono<ResponseEntity<Object>> Create(@Valid @RequestBody Pasive p) {
         log.info("[INI] Create Pasive");
         p.setCreatedDate(LocalDateTime.now());
-        return pasiveService.Create(p)
-                .doOnNext(pasive -> log.info(pasive.toString()))
-                .flatMap(pasive -> Mono.just(ResponseHandler.response("Done", HttpStatus.OK, pasive)))
-                .onErrorResume(error -> Mono.just(ResponseHandler.response(error.getMessage(), HttpStatus.BAD_REQUEST, null)))
+
+        return activeService.getClientDebt(p.getClientId())
+                .flatMap(responseMont -> {
+                    if(responseMont.getData() !=null)
+                    {
+                        log.info(responseMont.toString());
+
+                        if(responseMont.getData().getMont()<=0)
+                            return pasiveService.Create(p)
+                                    .flatMap(pasive -> Mono.just(ResponseHandler.response("Done", HttpStatus.OK, pasive)));
+                        else
+                            return Mono.just(ResponseHandler.response("You have debts", HttpStatus.BAD_REQUEST, null));
+
+                    }
+                    else
+                        return Mono.just(ResponseHandler.response("Not found", HttpStatus.NOT_FOUND, null));
+                })
                 .doFinally(fin -> log.info("[END] Create Pasive"));
+
     }
 
     @PostMapping("/mont/{id}")
