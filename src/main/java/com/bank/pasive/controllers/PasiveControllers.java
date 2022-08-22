@@ -6,6 +6,7 @@ import com.bank.pasive.models.documents.Pasive;
 import com.bank.pasive.models.utils.Mont;
 import com.bank.pasive.services.IActiveService;
 import com.bank.pasive.services.IClientService;
+import com.bank.pasive.services.IDebitCardService;
 import com.bank.pasive.services.IPasiveService;
 import io.github.resilience4j.circuitbreaker.annotation.CircuitBreaker;
 import io.github.resilience4j.timelimiter.annotation.TimeLimiter;
@@ -19,6 +20,7 @@ import reactor.core.publisher.Mono;
 
 import javax.validation.Valid;
 import java.time.LocalDateTime;
+import java.util.stream.Collectors;
 
 
 @RestController
@@ -30,6 +32,9 @@ public class PasiveControllers {
 
     @Autowired
     private IClientService parameterService;
+
+    @Autowired
+    private IDebitCardService debitCardService;
 
     @Autowired
     private IActiveService activeService;
@@ -152,5 +157,52 @@ public class PasiveControllers {
         log.error(id);
         log.error("[END] Failed FindType");
         return Mono.just(ResponseHandler.response("Overcharged method", HttpStatus.PAYLOAD_TOO_LARGE, null));
+    }
+
+    @PutMapping("/debitCard/{idDebitCard}")
+    public Mono<ResponseEntity<Object>> payWithDebitCard(@PathVariable String idDebitCard, @RequestBody Mont mont)
+    {
+        log.info("[INIT] payWithDebitCard");
+
+        return debitCardService.getDebitCardPasives(idDebitCard)
+                .flatMap(responseDebitCard -> {
+                    if(responseDebitCard.getData()!=null)
+                    {
+                        return pasiveService.FindAllById(responseDebitCard.getData())
+                                .collectList()
+                                .flatMap(pasives -> {
+
+                                    Float currentMont = (float)pasives.stream().mapToDouble(Pasive::getMont).sum();
+
+                                    var list = pasives.stream().map(pasive -> {
+                                        Float dif = mont.getMont() - pasive.getMont();
+
+                                        if (dif > 0)
+                                            pasive.setMont(0f);
+                                        else
+                                            pasive.setMont(pasive.getMont() + dif);
+
+                                        mont.setMont(Math.max(0, dif));
+
+                                        return pasive;
+
+                                    }).collect(Collectors.toList());
+
+                                    return pasiveService.SaveAll(list)
+                                            .collectList()
+                                            .flatMap(pasivesList ->{
+                                                if(pasivesList!=null)
+                                                    return Mono.just(ResponseHandler.response("Done", HttpStatus.OK, true));
+                                                else
+                                                    return Mono.just(ResponseHandler.response("Error", HttpStatus.BAD_REQUEST, false));
+                                            });
+                                });
+                    }
+                    else
+                    {
+                        return Mono.just(ResponseHandler.response("You don't have debit card pasives", HttpStatus.NO_CONTENT, null));
+                    }
+                })
+                .doFinally(fin -> log.info("[END] payWithDebitCard"));
     }
 }

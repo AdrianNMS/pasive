@@ -6,6 +6,7 @@ import com.bank.pasive.models.utils.Mont;
 import com.bank.pasive.services.IPasiveService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
 import java.util.List;
@@ -87,7 +88,15 @@ public class PasiveImpl implements IPasiveService
         );
     }
 
+    @Override
+    public Flux<Pasive> FindAllById(List<String> idPasives) {
+        return dao.findAllById(idPasives);
+    }
 
+    @Override
+    public Flux<Pasive> SaveAll(List<Pasive> pasives) {
+        return dao.saveAll(pasives);
+    }
 
 
 }

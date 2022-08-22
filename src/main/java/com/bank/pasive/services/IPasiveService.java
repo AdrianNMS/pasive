@@ -2,6 +2,7 @@ package com.bank.pasive.services;
 
 import com.bank.pasive.models.documents.Pasive;
 import com.bank.pasive.models.utils.Mont;
+import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
 import java.util.List;
@@ -16,4 +17,8 @@ public interface IPasiveService
     Mono<Pasive> SetMont(String id, Mont mont);
     Mono<Mont> GetMont(String id);
     Mono<Pasive> ExistByClientIdType(Integer type, String id);
+
+    Flux<Pasive> FindAllById(List<String> idPasives);
+
+    Flux<Pasive> SaveAll(List<Pasive> pasives);
 }
