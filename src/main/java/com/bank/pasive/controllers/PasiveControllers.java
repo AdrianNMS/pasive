@@ -147,7 +147,8 @@ public class PasiveControllers {
     @CircuitBreaker(name = RESILENCE_SERVICE,fallbackMethod ="failedFindType")
     public Mono<ResponseEntity<Object>> FindType(@PathVariable String id) {
         log.info("[INI] Find Type Pasive");
-        return FindTypeHelper.FindTypeSequence(log,parameterService,pasiveService,id);
+        return FindTypeHelper.FindTypeSequence(log,parameterService,pasiveService,id)
+                .doFinally(fin -> log.info("[END] Find Type Pasive"));
 
     }
 

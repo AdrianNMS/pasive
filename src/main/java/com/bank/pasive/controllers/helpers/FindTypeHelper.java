@@ -48,8 +48,8 @@ public class FindTypeHelper
             .doOnNext(pasive -> log.info(pasive.toString()))
             .flatMap(pasive ->
                     getParameterService(log,parameterService,pasive)
-            )
-            .doFinally(fin -> log.info("[END] Find Type Pasive"));
+            );
+
     }
 
     public static Mono<ResponseEntity<Object>> FindTypeSequence(Logger log, IClientService parameterService, IPasiveService pasiveService, String id)
