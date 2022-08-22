@@ -168,34 +168,44 @@ public class PasiveControllers {
                 .flatMap(responseDebitCard -> {
                     if(responseDebitCard.getData()!=null)
                     {
-                        return pasiveService.FindAllById(responseDebitCard.getData())
+                        var list = responseDebitCard.getData()
+                                .stream()
+                                .map(com.bank.pasive.models.utils.Pasive::getId)
+                                .collect(Collectors.toList());
+
+                        return pasiveService.FindAllById(list)
                                 .collectList()
                                 .flatMap(pasives -> {
 
-                                    Float currentMont = (float)pasives.stream().mapToDouble(Pasive::getMont).sum();
+                                    Float currentMont = (float) pasives.stream().mapToDouble(Pasive::getMont).sum();
 
-                                    var list = pasives.stream().map(pasive -> {
-                                        Float dif = mont.getMont() - pasive.getMont();
+                                    if(currentMont<mont.getMont())
+                                        return Mono.just(ResponseHandler.response("You don't have enough credit", HttpStatus.BAD_REQUEST, false));
+                                    else
+                                    {
+                                        var IdList = pasives.stream().map(pasive -> {
+                                            Float dif = mont.getMont() - pasive.getMont();
 
-                                        if (dif > 0)
-                                            pasive.setMont(0f);
-                                        else
-                                            pasive.setMont(pasive.getMont() + dif);
+                                            if (dif > 0)
+                                                pasive.setMont(0f);
+                                            else
+                                                pasive.setMont(pasive.getMont() + dif);
 
-                                        mont.setMont(Math.max(0, dif));
+                                            mont.setMont(Math.max(0, dif));
 
-                                        return pasive;
+                                            return pasive;
 
-                                    }).collect(Collectors.toList());
+                                        }).collect(Collectors.toList());
 
-                                    return pasiveService.SaveAll(list)
-                                            .collectList()
-                                            .flatMap(pasivesList ->{
-                                                if(pasivesList!=null)
-                                                    return Mono.just(ResponseHandler.response("Done", HttpStatus.OK, true));
-                                                else
-                                                    return Mono.just(ResponseHandler.response("Error", HttpStatus.BAD_REQUEST, false));
-                                            });
+                                        return pasiveService.SaveAll(IdList)
+                                                .collectList()
+                                                .flatMap(pasivesList -> {
+                                                    if (pasivesList != null)
+                                                        return Mono.just(ResponseHandler.response("Done", HttpStatus.OK, true));
+                                                    else
+                                                        return Mono.just(ResponseHandler.response("Error", HttpStatus.BAD_REQUEST, false));
+                                                });
+                                    }
                                 });
                     }
                     else
