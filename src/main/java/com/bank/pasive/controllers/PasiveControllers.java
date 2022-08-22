@@ -3,6 +3,7 @@ package com.bank.pasive.controllers;
 import com.bank.pasive.controllers.helpers.FindTypeHelper;
 import com.bank.pasive.handler.ResponseHandler;
 import com.bank.pasive.models.documents.Pasive;
+import com.bank.pasive.models.utils.DebitCardPasive;
 import com.bank.pasive.models.utils.Mont;
 import com.bank.pasive.services.IActiveService;
 import com.bank.pasive.services.IClientService;
@@ -163,21 +164,29 @@ public class PasiveControllers {
     public Mono<ResponseEntity<Object>> payWithDebitCard(@PathVariable String idDebitCard, @RequestBody Mont mont)
     {
         log.info("[INIT] payWithDebitCard");
+        log.info(idDebitCard);
 
         return debitCardService.getDebitCardPasives(idDebitCard)
                 .flatMap(responseDebitCard -> {
-                    if(responseDebitCard.getData()!=null)
+                    log.info(responseDebitCard.toString());
+                    if(!responseDebitCard.getData().isEmpty())
                     {
                         var list = responseDebitCard.getData()
                                 .stream()
-                                .map(com.bank.pasive.models.utils.Pasive::getId)
+                                .map(DebitCardPasive::getPasiveId)
                                 .collect(Collectors.toList());
+
+                        log.info(list.toString());
 
                         return pasiveService.FindAllById(list)
                                 .collectList()
                                 .flatMap(pasives -> {
+                                    log.info("Obtain all pasives");
+                                    log.info(pasives.toString());
 
-                                    Float currentMont = (float) pasives.stream().mapToDouble(Pasive::getMont).sum();
+                                    float currentMont = (float) pasives.stream().mapToDouble(Pasive::getMont).sum();
+
+                                    log.info(currentMont+"");
 
                                     if(currentMont<mont.getMont())
                                         return Mono.just(ResponseHandler.response("You don't have enough credit", HttpStatus.BAD_REQUEST, false));
@@ -199,8 +208,10 @@ public class PasiveControllers {
 
                                         return pasiveService.SaveAll(IdList)
                                                 .collectList()
-                                                .flatMap(pasivesList -> {
-                                                    if (pasivesList != null)
+                                                .flatMap(pasivesList ->
+                                                {
+                                                    log.info(pasivesList.toString());
+                                                    if (!pasivesList.isEmpty())
                                                         return Mono.just(ResponseHandler.response("Done", HttpStatus.OK, true));
                                                     else
                                                         return Mono.just(ResponseHandler.response("Error", HttpStatus.BAD_REQUEST, false));

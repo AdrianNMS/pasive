@@ -3,7 +3,7 @@ package com.bank.pasive.models.utils;
 import lombok.Data;
 
 @Data
-public class Pasive
+public class DebitCardPasive
 {
-    private String id;
+    private String pasiveId;
 }

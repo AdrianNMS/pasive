@@ -18,7 +18,7 @@ public class DebitCardImpl implements IDebitCardService
     @Override
     public Mono<ResponseDebitCard> getDebitCardPasives(String idDebitCard) {
         return webClient.get()
-                .uri("/api/debitcard/debit/"+ idDebitCard)
+                .uri("/api/debitCard/debit/"+ idDebitCard)
                 .retrieve()
                 .bodyToMono(ResponseDebitCard.class);
     }

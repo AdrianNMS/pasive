@@ -7,7 +7,7 @@ import java.util.List;
 @Data
 public class ResponseDebitCard
 {
-    private List<Pasive> data;
+    private List<DebitCardPasive> data;
     private String message;
 
     private String status;
