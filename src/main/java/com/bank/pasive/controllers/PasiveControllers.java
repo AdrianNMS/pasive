@@ -111,6 +111,7 @@ public class PasiveControllers {
     @PutMapping("/{id}")
     public Mono<ResponseEntity<Object>> Update(@PathVariable("id") String id,@Valid @RequestBody Pasive p) {
         log.info("[INI] Update Pasive");
+        p.setUpdateDate(LocalDateTime.now());
         return pasiveService.Update(id,p)
                 .flatMap(pasive -> Mono.just(ResponseHandler.response("Done", HttpStatus.OK, pasive)))
                 .onErrorResume(error -> Mono.just(ResponseHandler.response(error.getMessage(), HttpStatus.BAD_REQUEST, null)))

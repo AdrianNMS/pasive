@@ -37,8 +37,9 @@ public class PasiveImpl implements IPasiveService
     public Mono<Pasive> Update(String id, Pasive pasive) {
         return dao.existsById(id).flatMap(check ->
         {
-            if (check)
+            if (Boolean.TRUE.equals(check))
             {
+                pasive.setId(id);
                 return dao.save(pasive);
             }
             else
@@ -50,7 +51,7 @@ public class PasiveImpl implements IPasiveService
     @Override
     public Mono<Object> Delete(String id) {
         return dao.existsById(id).flatMap(check -> {
-            if (check)
+            if (Boolean.TRUE.equals(check))
                 return dao.deleteById(id).then(Mono.just(true));
             else
                 return Mono.empty();
