@@ -166,6 +166,7 @@ public class PasiveControllers {
     {
         log.info("[INIT] payWithDebitCard");
         log.info(idDebitCard);
+        log.info(mont.toString());
 
         return debitCardService.getDebitCardPasives(idDebitCard)
                 .flatMap(responseDebitCard -> {
@@ -194,14 +195,20 @@ public class PasiveControllers {
                                     else
                                     {
                                         var IdList = pasives.stream().map(pasive -> {
-                                            Float dif = mont.getMont() - pasive.getMont();
+                                            float dif = pasive.getMont() + mont.getMont();
 
-                                            if (dif > 0)
-                                                pasive.setMont(0f);
+                                            log.info(dif+"");
+
+                                            if (dif >= 0)
+                                            {
+                                                pasive.setMont(dif);
+                                                mont.setMont(0f);
+                                            }
                                             else
-                                                pasive.setMont(pasive.getMont() + dif);
-
-                                            mont.setMont(Math.max(0, dif));
+                                            {
+                                                pasive.setMont(0f);
+                                                mont.setMont(Math.abs(dif));
+                                            }
 
                                             return pasive;
 
